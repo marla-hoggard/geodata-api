@@ -19,7 +19,7 @@ def get_networks_in_range():
   height = float(request.args.get('ht'))
   width = float(request.args.get('width'))
 
-  df = pd.read_csv('geolite2-city-blocks-IPv4.csv', usecols=['network', 'latitude', 'longitude'])
+  df = pd.read_csv('geolite2-city-blocks-IPv4.csv.gz', compression='gzip', usecols=['network', 'latitude', 'longitude'])
   df = df[(df['latitude'] >= lat - height/2) & (df['latitude'] <= lat + height/2)]
   df = df[(df['longitude'] >= lg - width/2) & (df['longitude'] <= lg + width/2)]
   return df.to_json(orient='records')
