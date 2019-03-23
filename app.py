@@ -1,6 +1,7 @@
 from flask import Flask, request
 from flask_cors import CORS
 import pandas as pd
+import dask.dataframe as dd
     
 app = Flask(__name__)
 CORS(app)
@@ -21,10 +22,10 @@ def get_networks_in_range():
   height = float(request.args.get('ht'))
   width = float(request.args.get('width'))
 
-  df = pd.read_csv('geolite2-city-blocks-IPv4.csv.gz', compression='gzip', usecols=['network', 'latitude', 'longitude'])
-  df = df[(df['latitude'] >= lat - height/2) & (df['latitude'] <= lat + height/2)]
-  df = df[(df['longitude'] >= lg - width/2) & (df['longitude'] <= lg + width/2)]
-  return df.to_json(orient='records')
+  df = dd.read_csv('geolite2-city-blocks-IPv4.csv.gz', blocksize=500e3, compression='gzip', usecols=['network', 'latitude', 'longitude'])
+  df = df[(df.latitude >= lat - height/2) & (df.latitude <= lat + height/2) & (df.longitude >= lg - width/2) & (df.longitude <= lg + width/2)]
+  p = df.compute()
+  return p.to_json(orient='records')
 
 if __name__ == '__main__':
   app.run()
